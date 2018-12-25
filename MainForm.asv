@@ -22,7 +22,7 @@ function varargout = MainForm(varargin)
 
 % Edit the above text to modify the response to help MainForm
 
-% Last Modified by GUIDE v2.5 25-Dec-2018 15:45:40
+% Last Modified by GUIDE v2.5 25-Dec-2018 17:35:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,25 +86,43 @@ b0 = [
     1
  ];
 
+approxMethod = 'constant';
+approxStr = get(get(handles.approxButtonGroup,'SelectedObject'),'String');
+if strcmp(approxStr, 'Linear')
+    approxMethod  = 'linear';
+end
+
 method = get(get(handles.methodBtnGroup,'SelectedObject'),'String');
 
 if strcmp(method,"FDM")
-    q = FiniteDifferences(b0);
+    q = FiniteDifferences(b0, approxMethod);
 elseif strcmp(method,"DDM")
-    q = DirectDiff(b0);
+    q = DirectDiff(b0, approxMethod);
 elseif strcmp(method,"AM")
-    q = Adjoint(b0);
+    q = Adjoint(b0, approxMethod);
 else
-    q = GeneralProblem(b0);
+    q = GeneralProblem(b0, approxMethod);
 end
 
-% FiniteDifferences
-% Adjoint
-% DirectDiff
-%q = GeneralProblem(b0);
+q.gammaY = str2num(get(handles.gammaYTb,'String'));
+q.gammaU = str2num(get(handles.gammaUTb,'String'));
+
+q.uMin = str2num(get(handles.uMinTb,'String'));
+q.uMax = str2num(get(handles.uMaxTb,'String'));
 
 x0Bc = get(get(handles.x0ButtonGroup,'SelectedObject'),'String');
 xeBc = get(get(handles.xeButtonGroup,'SelectedObject'),'String');
+
+
+q.x0 = str2num(get(handles.x0Tb,'String'));
+q.xE = str2num(get(handles.xeTb,'String'));
+
+q.p = [str2num(get(handles.p1Tb,'String')),...
+       str2num(get(handles.p2Tb,'String'))];
+   
+q.k = str2num(get(handles.kTb,'String'));
+%q.yd = str2num(get(handles.ydTb,'String'));
+%q.yMax = str2num(get(handles.yMaxTb,'String'));
 
 if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
     q.bcType = [Helper.Dirichlet; Helper.Dirichlet];
@@ -117,6 +135,7 @@ elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Neumann'))
 end
 
 % Model functions.
+q.r  = @(x) eval(get(handles.rTb,'String'));
 q.g1 = @(x) eval(get(handles.g1Tb,'String'));
 q.g3 = @(x) eval(get(handles.g3Tb,'String'));
 q.f0 = @(x) eval(get(handles.f0Tb,'String'));
@@ -126,12 +145,6 @@ q.d = [str2num(get(handles.x0BcValue,'String')), ...
        str2num(get(handles.xeBcValue,'String'))];
 
 psi1Constr = get(handles.psi1ConstraintCb,'Value');
-
-approxMethod = 'constant';
-approxStr = get(get(handles.approxButtonGroup,'SelectedObject'),'String');
-if strcmp(approxStr, 'Linear')
-    approxMethod  = 'linear';
-end
 
 q.optimize(psi1Constr, true);
 %q.direct()
@@ -291,18 +304,18 @@ end
 
 
 
-function edit10_Callback(hObject, eventdata, handles)
-% hObject    handle to edit10 (see GCBO)
+function uMinTb_Callback(hObject, eventdata, handles)
+% hObject    handle to uMinTb (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit10 as text
-%        str2double(get(hObject,'String')) returns contents of edit10 as a double
+% Hints: get(hObject,'String') returns contents of uMinTb as text
+%        str2double(get(hObject,'String')) returns contents of uMinTb as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit10_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit10 (see GCBO)
+function uMinTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uMinTb (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -314,18 +327,261 @@ end
 
 
 
-function edit11_Callback(hObject, eventdata, handles)
-% hObject    handle to edit11 (see GCBO)
+function uMaxTb_Callback(hObject, eventdata, handles)
+% hObject    handle to uMaxTb (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit11 as text
-%        str2double(get(hObject,'String')) returns contents of edit11 as a double
+% Hints: get(hObject,'String') returns contents of uMaxTb as text
+%        str2double(get(hObject,'String')) returns contents of uMaxTb as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit11_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit11 (see GCBO)
+function uMaxTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uMaxTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function gammaYTb_Callback(hObject, eventdata, handles)
+% hObject    handle to gammaYTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gammaYTb as text
+%        str2double(get(hObject,'String')) returns contents of gammaYTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gammaYTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gammaYTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function gammaUTb_Callback(hObject, eventdata, handles)
+% hObject    handle to gammaUTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gammaUTb as text
+%        str2double(get(hObject,'String')) returns contents of gammaUTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gammaUTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gammaUTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: delete(hObject) closes the figure
+question = questdlg('Are you sure?','Question')
+if strcmp(question,'Yes')
+    delete(hObject);
+end
+
+
+
+function x0Tb_Callback(hObject, eventdata, handles)
+% hObject    handle to x0Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of x0Tb as text
+%        str2double(get(hObject,'String')) returns contents of x0Tb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function x0Tb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to x0Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function xeTb_Callback(hObject, eventdata, handles)
+% hObject    handle to xeTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xeTb as text
+%        str2double(get(hObject,'String')) returns contents of xeTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function xeTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xeTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function p1Tb_Callback(hObject, eventdata, handles)
+% hObject    handle to p1Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of p1Tb as text
+%        str2double(get(hObject,'String')) returns contents of p1Tb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function p1Tb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to p1Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function p2Tb_Callback(hObject, eventdata, handles)
+% hObject    handle to p2Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of p2Tb as text
+%        str2double(get(hObject,'String')) returns contents of p2Tb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function p2Tb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to p2Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function kTb_Callback(hObject, eventdata, handles)
+% hObject    handle to kTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of kTb as text
+%        str2double(get(hObject,'String')) returns contents of kTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function kTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to kTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function ydTb_Callback(hObject, eventdata, handles)
+% hObject    handle to ydTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of ydTb as text
+%        str2double(get(hObject,'String')) returns contents of ydTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function ydTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to ydTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function yMaxTb_Callback(hObject, eventdata, handles)
+% hObject    handle to yMaxTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yMaxTb as text
+%        str2double(get(hObject,'String')) returns contents of yMaxTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function yMaxTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to yMaxTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function rTb_Callback(hObject, eventdata, handles)
+% hObject    handle to rTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of rTb as text
+%        str2double(get(hObject,'String')) returns contents of rTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function rTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rTb (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
