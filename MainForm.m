@@ -103,13 +103,8 @@ elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Neumann'))
     q.bcType = [Helper.Neumann; Helper.Neumann]
 end
 
-% if strcmp(x0Bc,'Dirichlet')
-%     q.bcType(:,1) = Helper.Dirichlet;
-% else
-%     q.bcType(:,1) = Helper.Neumann;
-% end
-
-q.bcType
+q.d = [str2num(get(handles.x0BcValue,'String')), ...
+       str2num(get(handles.xeBcValue,'String'))];
 
 q.optimize(false, true);
 %q.direct()
