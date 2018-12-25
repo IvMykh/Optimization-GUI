@@ -1,7 +1,7 @@
 classdef Adjoint < SensitivityHelper
     methods
-        function this = Adjoint(b)
-            this = this@SensitivityHelper(b);
+        function this = Adjoint(b, m)
+            this = this@SensitivityHelper(b, m);
             this.initPrime();
         end
         function initPrime(this)

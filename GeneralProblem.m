@@ -1,6 +1,7 @@
 classdef GeneralProblem < handle
     methods
-        function this = GeneralProblem(b)
+        function this = GeneralProblem(b, m)
+            this.method = m;
             if length(b) == 1 && strcmp(this.method, 'linear')
                 b = [b b];
             end

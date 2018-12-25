@@ -1,7 +1,7 @@
 classdef FiniteDifferences < SensitivityHelper
     methods
-        function this = FiniteDifferences(b)
-            this = this@SensitivityHelper(b);
+        function this = FiniteDifferences(b, m)
+            this = this@SensitivityHelper(b, m);
         end
         
         function grad = Gradient(this, index)

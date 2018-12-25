@@ -1,7 +1,7 @@
 classdef (Abstract) SensitivityHelper < GeneralProblem
     methods
-        function this = SensitivityHelper(b)
-            this = this@GeneralProblem(b);
+        function this = SensitivityHelper(b, m)
+            this = this@GeneralProblem(b, m);
         end
         function updateControl(this, b)
             this.updateControl@GeneralProblem(b);
