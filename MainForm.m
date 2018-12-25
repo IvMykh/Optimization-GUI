@@ -22,7 +22,7 @@ function varargout = MainForm(varargin)
 
 % Edit the above text to modify the response to help MainForm
 
-% Last Modified by GUIDE v2.5 25-Dec-2018 11:40:41
+% Last Modified by GUIDE v2.5 25-Dec-2018 12:45:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -85,13 +85,26 @@ b0 = [
     1 
     1
  ];
+
+method = get(get(handles.methodBtnGroup,'SelectedObject'),'String');
+
+if strcmp(method,"FDM")
+    q = FiniteDifferences(b0);
+elseif strcmp(method,"DDM")
+    q = DirectDiff(b0);
+elseif strcmp(method,"AM")
+    q = Adjoint(b0);
+else
+    q = GeneralProblem(b0);
+end
+
 % FiniteDifferences
 % Adjoint
 % DirectDiff
-q = GeneralProblem(b0);
+%q = GeneralProblem(b0);
 
-x0Bc =get(get(handles.x0ButtonGroup,'SelectedObject'),'String')
-xeBc = get(get(handles.xeButtonGroup,'SelectedObject'),'String')
+x0Bc = get(get(handles.x0ButtonGroup,'SelectedObject'),'String');
+xeBc = get(get(handles.xeButtonGroup,'SelectedObject'),'String');
 
 if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
     q.bcType = [Helper.Dirichlet; Helper.Dirichlet]
@@ -106,7 +119,9 @@ end
 q.d = [str2num(get(handles.x0BcValue,'String')), ...
        str2num(get(handles.xeBcValue,'String'))];
 
-q.optimize(false, true);
+psi1Constr = get(handles.psi1ConstraintCb,'Value');
+   
+q.optimize(psi1Constr, true);
 %q.direct()
 q.b
 q.criteria()
@@ -160,3 +175,12 @@ function x0BcValue_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in psi1ConstraintCb.
+function psi1ConstraintCb_Callback(hObject, eventdata, handles)
+% hObject    handle to psi1ConstraintCb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of psi1ConstraintCb
