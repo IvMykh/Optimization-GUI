@@ -22,7 +22,7 @@ function varargout = MainForm(varargin)
 
 % Edit the above text to modify the response to help MainForm
 
-% Last Modified by GUIDE v2.5 25-Dec-2018 12:45:32
+% Last Modified by GUIDE v2.5 25-Dec-2018 14:03:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -107,14 +107,20 @@ x0Bc = get(get(handles.x0ButtonGroup,'SelectedObject'),'String');
 xeBc = get(get(handles.xeButtonGroup,'SelectedObject'),'String');
 
 if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
-    q.bcType = [Helper.Dirichlet; Helper.Dirichlet]
+    q.bcType = [Helper.Dirichlet; Helper.Dirichlet];
 elseif (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Neumann'))
-    q.bcType = [Helper.Dirichlet; Helper.Neumann]
+    q.bcType = [Helper.Dirichlet; Helper.Neumann];
 elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Dirichlet'))
-    q.bcType = [Helper.Neumann; Helper.Dirichlet]
+    q.bcType = [Helper.Neumann; Helper.Dirichlet];
 elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Neumann'))
-    q.bcType = [Helper.Neumann; Helper.Neumann]
+    q.bcType = [Helper.Neumann; Helper.Neumann];
 end
+
+% Model functions.
+q.g1 = @(x) eval(get(handles.g1Tb,'String'));
+q.g3 = @(x) eval(get(handles.g3Tb,'String'));
+q.f0 = @(x) eval(get(handles.f0Tb,'String'));
+q.fu = @(x) eval(get(handles.fuTb,'String'));
 
 q.d = [str2num(get(handles.x0BcValue,'String')), ...
        str2num(get(handles.xeBcValue,'String'))];
@@ -184,3 +190,95 @@ function psi1ConstraintCb_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of psi1ConstraintCb
+
+
+
+function g1Tb_Callback(hObject, eventdata, handles)
+% hObject    handle to g1Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of g1Tb as text
+%        str2double(get(hObject,'String')) returns contents of g1Tb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function g1Tb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to g1Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function g3Tb_Callback(hObject, eventdata, handles)
+% hObject    handle to g3Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of g3Tb as text
+%        str2double(get(hObject,'String')) returns contents of g3Tb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function g3Tb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to g3Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function f0Tb_Callback(hObject, eventdata, handles)
+% hObject    handle to f0Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of f0Tb as text
+%        str2double(get(hObject,'String')) returns contents of f0Tb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function f0Tb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to f0Tb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function fuTb_Callback(hObject, eventdata, handles)
+% hObject    handle to fuTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of fuTb as text
+%        str2double(get(hObject,'String')) returns contents of fuTb as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function fuTb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to fuTb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
