@@ -78,86 +78,90 @@ function computeBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to computeBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-clc;
+try
+    clc;
 
-tic;
-b0 = [
-    1 
-    1
- ];
+    tic;
+    b0 = [
+        1 
+        1
+     ];
 
-approxMethod = 'constant';
-approxStr = get(get(handles.approxButtonGroup,'SelectedObject'),'String');
-if strcmp(approxStr, 'Linear')
-    approxMethod  = 'linear';
+    approxMethod = 'constant';
+    approxStr = get(get(handles.approxButtonGroup,'SelectedObject'),'String');
+    if strcmp(approxStr, 'Linear')
+        approxMethod  = 'linear';
+    end
+
+    q.x0 = str2num(get(handles.x0Tb,'String'));
+    q.xE = str2num(get(handles.xeTb,'String'));
+
+    n = str2num(get(handles.nTb,'String'))
+    xs = linspace(q.x0, q.xE, n);
+    rFun = @(x) eval(get(handles.rTb,'String'));
+    b0 = arrayfun(rFun, xs);
+
+    method = get(get(handles.methodBtnGroup,'SelectedObject'),'String');
+
+    if strcmp(method,"FDM")
+        q = FiniteDifferences(b0, approxMethod);
+    elseif strcmp(method,"DDM")
+        q = DirectDiff(b0, approxMethod);
+    elseif strcmp(method,"AM")
+        q = Adjoint(b0, approxMethod);
+    else
+        q = GeneralProblem(b0, approxMethod);
+    end
+
+    q.gammaY = str2num(get(handles.gammaYTb,'String'));
+    q.gammaU = str2num(get(handles.gammaUTb,'String'));
+
+    q.uMin = str2num(get(handles.uMinTb,'String'));
+    q.uMax = str2num(get(handles.uMaxTb,'String'));
+
+    x0Bc = get(get(handles.x0ButtonGroup,'SelectedObject'),'String');
+    xeBc = get(get(handles.xeButtonGroup,'SelectedObject'),'String');
+
+    q.p = [str2num(get(handles.p1Tb,'String')),...
+           str2num(get(handles.p2Tb,'String'))];
+
+    q.k = str2num(get(handles.kTb,'String'));
+    %q.yd = str2num(get(handles.ydTb,'String'));
+    %q.yMax = str2num(get(handles.yMaxTb,'String'));
+
+    if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
+        q.bcType = [Helper.Dirichlet; Helper.Dirichlet];
+    elseif (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Neumann'))
+        q.bcType = [Helper.Dirichlet; Helper.Neumann];
+    elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Dirichlet'))
+        q.bcType = [Helper.Neumann; Helper.Dirichlet];
+    elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Neumann'))
+        q.bcType = [Helper.Neumann; Helper.Neumann];
+    end
+
+    % Model functions.
+    q.r  = @(x) eval(get(handles.rTb,'String'));
+    q.g1 = @(x) eval(get(handles.g1Tb,'String'));
+    q.g3 = @(x) eval(get(handles.g3Tb,'String'));
+    q.f0 = @(x) eval(get(handles.f0Tb,'String'));
+    q.fu = @(x) eval(get(handles.fuTb,'String'));
+
+    q.d = [str2num(get(handles.x0BcValue,'String')), ...
+           str2num(get(handles.xeBcValue,'String'))];
+
+    psi1Constr = get(handles.psi1ConstraintCb,'Value');
+
+    q.optimize(psi1Constr, true);
+    %q.direct()
+    q.b
+    q.criteria()
+    q.constraint()
+    toc;
+
+    plotResults(q, 'Title')
+catch err
+   f = msgbox(getReport(err)); 
 end
-
-q.x0 = str2num(get(handles.x0Tb,'String'));
-q.xE = str2num(get(handles.xeTb,'String'));
-
-n = str2num(get(handles.nTb,'String'))
-xs = linspace(q.x0, q.xE, n);
-rFun = @(x) eval(get(handles.rTb,'String'));
-b0 = arrayfun(rFun, xs);
-
-method = get(get(handles.methodBtnGroup,'SelectedObject'),'String');
-
-if strcmp(method,"FDM")
-    q = FiniteDifferences(b0, approxMethod);
-elseif strcmp(method,"DDM")
-    q = DirectDiff(b0, approxMethod);
-elseif strcmp(method,"AM")
-    q = Adjoint(b0, approxMethod);
-else
-    q = GeneralProblem(b0, approxMethod);
-end
-
-q.gammaY = str2num(get(handles.gammaYTb,'String'));
-q.gammaU = str2num(get(handles.gammaUTb,'String'));
-
-q.uMin = str2num(get(handles.uMinTb,'String'));
-q.uMax = str2num(get(handles.uMaxTb,'String'));
-
-x0Bc = get(get(handles.x0ButtonGroup,'SelectedObject'),'String');
-xeBc = get(get(handles.xeButtonGroup,'SelectedObject'),'String');
-
-q.p = [str2num(get(handles.p1Tb,'String')),...
-       str2num(get(handles.p2Tb,'String'))];
-   
-q.k = str2num(get(handles.kTb,'String'));
-%q.yd = str2num(get(handles.ydTb,'String'));
-%q.yMax = str2num(get(handles.yMaxTb,'String'));
-
-if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
-    q.bcType = [Helper.Dirichlet; Helper.Dirichlet];
-elseif (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Neumann'))
-    q.bcType = [Helper.Dirichlet; Helper.Neumann];
-elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Dirichlet'))
-    q.bcType = [Helper.Neumann; Helper.Dirichlet];
-elseif (strcmp(x0Bc,'Neumann') && strcmp(xeBc,'Neumann'))
-    q.bcType = [Helper.Neumann; Helper.Neumann];
-end
-
-% Model functions.
-q.r  = @(x) eval(get(handles.rTb,'String'));
-q.g1 = @(x) eval(get(handles.g1Tb,'String'));
-q.g3 = @(x) eval(get(handles.g3Tb,'String'));
-q.f0 = @(x) eval(get(handles.f0Tb,'String'));
-q.fu = @(x) eval(get(handles.fuTb,'String'));
-
-q.d = [str2num(get(handles.x0BcValue,'String')), ...
-       str2num(get(handles.xeBcValue,'String'))];
-
-psi1Constr = get(handles.psi1ConstraintCb,'Value');
-
-q.optimize(psi1Constr, true);
-%q.direct()
-q.b
-q.criteria()
-q.constraint()
-toc;
-
-plotResults(q, 'Title')
 
 
 
