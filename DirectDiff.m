@@ -1,7 +1,7 @@
 classdef DirectDiff < SensitivityHelper
     methods
-        function this = DirectDiff(b, m)
-            this = this@SensitivityHelper(b, m);
+        function this = DirectDiff(b, m, j)
+            this = this@SensitivityHelper(b, m, j);
         end
         
         function dm = odeDDM(this, x, m, i)
