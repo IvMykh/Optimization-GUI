@@ -1,4 +1,35 @@
 classdef GeneralProblem < handle
+    
+    properties
+        j = 1    % index of u in [r g1 g3 fu]
+        optO = 1 % index of Omega to minimize on
+        method = 'linear' % linear or constant
+        bcType = [Helper.Neumann; Helper.Neumann]
+        d = [1 1] % boundary condition values
+    end
+    
+    properties
+        b0 % initial opt. var values
+        b  % current opt. var values
+        sol0
+        r  = @(x) 1
+        g1 = @(x) 3
+        g3 = @(x) 2
+        fu = @(x) 3
+        f0 = @(x) 1
+        x0 = 0
+        xE = 1
+        uMin = -10
+        uMax = 10
+        gammaY = 1
+        gammaU = 1e-2
+        p = [0.25 0.25]
+        k = 0.1
+        yd = 0 
+        yMax = 1
+        cacheBVP = {}
+    end
+    
     methods
         function this = GeneralProblem(b, m, j)
             this.method = m;
@@ -6,9 +37,10 @@ classdef GeneralProblem < handle
             if length(b) == 1 && strcmp(this.method, 'linear')
                 b = [b b];
             end
+            this.b0 = b;
             this.b = b;
-            this.replaceU();
-            this.initConstraints();
+            %this.replaceU();
+            %this.initConstraints();
         end
         
         function replaceU(this)
@@ -30,6 +62,10 @@ classdef GeneralProblem < handle
         
         function u = u(this, x)
             u = this.interpolate(x, this.b, this.method);
+        end
+        
+        function u0 = u0(this, x)
+            u0 = this.interpolate(x, this.b0, this.method);
         end
         
         function dy = ode(this, x, y)
@@ -87,6 +123,7 @@ classdef GeneralProblem < handle
         
         function initConstraints(this)
             sol = this.direct();
+            this.sol0 = sol;
             y = sol.y(1,:);
             y1 = min(y);
             y2 = max(y);
@@ -174,33 +211,5 @@ classdef GeneralProblem < handle
             end
             this.setControl(b);
         end
-    end
-    
-    properties
-        j = 1    % index of u in [r g1 g3 fu]
-        optO = 1 % index of Omega to minimize on
-        method = 'linear' % linear or constant
-        bcType = [Helper.Neumann; Helper.Neumann]
-        d = [1 1] % boundary condition values
-    end
-    
-    properties
-        b  % current opt. var values
-        r  = @(x) 1
-        g1 = @(x) 3
-        g3 = @(x) 2
-        fu = @(x) 3
-        f0 = @(x) 1
-        x0 = 0
-        xE = 1
-        uMin = -10
-        uMax = 10
-        gammaY = 1
-        gammaU = 1e-2
-        p = [0.25 0.25]
-        k = 0.1
-        yd = 0 
-        yMax = 1
-        cacheBVP = {}
     end
 end

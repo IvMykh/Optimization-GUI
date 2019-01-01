@@ -106,27 +106,28 @@ try
             j = 4;
             uFun = @(x) eval(get(handles.fuTb,'String'));
     end
-    
-    q.x0 = str2num(get(handles.x0Tb,'String'));
-    q.xE = str2num(get(handles.xeTb,'String'));
 
-    n = str2num(get(handles.nTb,'String'))
-    xs = linspace(q.x0, q.xE, n);
-    % uFun = @(x) eval(get(handles.rTb,'String'));
+    theX0 = str2num(get(handles.x0Tb,'String'));
+    theXe = str2num(get(handles.xeTb,'String'));
+    
+    n = str2num(get(handles.nTb,'String'));
+    xs = linspace(theX0, theXe, n);
     b0 = arrayfun(uFun, xs);
 
     method = get(get(handles.methodBtnGroup,'SelectedObject'),'String');
-
+    
+    q = GeneralProblem(b0, approxMethod, j);
     if strcmp(method,"FDM")
         q = FiniteDifferences(b0, approxMethod, j);
     elseif strcmp(method,"DDM")
         q = DirectDiff(b0, approxMethod, j);
     elseif strcmp(method,"AM")
         q = Adjoint(b0, approxMethod, j);
-    else
-        q = GeneralProblem(b0, approxMethod, j);
     end
 
+    q.x0 = theX0;
+    q.xE = theXe;
+    
     q.gammaY = str2num(get(handles.gammaYTb,'String'));
     q.gammaU = str2num(get(handles.gammaUTb,'String'));
 
@@ -140,8 +141,6 @@ try
            str2num(get(handles.p2Tb,'String'))];
 
     q.k = str2num(get(handles.kTb,'String'));
-    %q.yd = str2num(get(handles.ydTb,'String'));
-    %q.yMax = str2num(get(handles.yMaxTb,'String'));
 
     if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
         q.bcType = [Helper.Dirichlet; Helper.Dirichlet];
@@ -164,8 +163,13 @@ try
            str2num(get(handles.xeBcValue,'String'))];
 
     psi1Constr = get(handles.psi1ConstraintCb,'Value');
-
+    
+    q.replaceU();
+    q.initConstraints();
+    
+    disp('Optimization: computation started ...');
     q.optimize(psi1Constr, true);
+    disp('Optimization: computation finished!');
     %q.direct()
     q.b
     q.criteria()
@@ -805,7 +809,7 @@ function solveDirectBtn_Callback(hObject, eventdata, handles)
 try
     clc;
     tic;
-
+    
     approxMethod = 'constant';
     approxStr = get(get(handles.approxButtonGroup,'SelectedObject'),'String');
     if strcmp(approxStr, 'Linear')
@@ -830,27 +834,28 @@ try
             j = 4;
             uFun = @(x) eval(get(handles.fuTb,'String'));
     end
-    
-    q.x0 = str2num(get(handles.x0Tb,'String'));
-    q.xE = str2num(get(handles.xeTb,'String'));
 
-    n = str2num(get(handles.nTb,'String'))
-    xs = linspace(q.x0, q.xE, n);
-    % uFun = @(x) eval(get(handles.rTb,'String'));
+    theX0 = str2num(get(handles.x0Tb,'String'));
+    theXe = str2num(get(handles.xeTb,'String'));
+    
+    n = str2num(get(handles.nTb,'String'));
+    xs = linspace(theX0, theXe, n);
     b0 = arrayfun(uFun, xs);
 
     method = get(get(handles.methodBtnGroup,'SelectedObject'),'String');
-
+    
+    q = GeneralProblem(b0, approxMethod, j);
     if strcmp(method,"FDM")
         q = FiniteDifferences(b0, approxMethod, j);
     elseif strcmp(method,"DDM")
         q = DirectDiff(b0, approxMethod, j);
     elseif strcmp(method,"AM")
         q = Adjoint(b0, approxMethod, j);
-    else
-        q = GeneralProblem(b0, approxMethod, j);
     end
 
+    q.x0 = theX0;
+    q.xE = theXe;
+    
     q.gammaY = str2num(get(handles.gammaYTb,'String'));
     q.gammaU = str2num(get(handles.gammaUTb,'String'));
 
@@ -864,8 +869,6 @@ try
            str2num(get(handles.p2Tb,'String'))];
 
     q.k = str2num(get(handles.kTb,'String'));
-    %q.yd = str2num(get(handles.ydTb,'String'));
-    %q.yMax = str2num(get(handles.yMaxTb,'String'));
 
     if (strcmp(x0Bc,'Dirichlet') && strcmp(xeBc,'Dirichlet'))
         q.bcType = [Helper.Dirichlet; Helper.Dirichlet];
@@ -887,7 +890,14 @@ try
     q.d = [str2num(get(handles.x0BcValue,'String')), ...
            str2num(get(handles.xeBcValue,'String'))];
 
-    q.direct()
+    psi1Constr = get(handles.psi1ConstraintCb,'Value');
+    
+    q.replaceU();
+    q.initConstraints();
+    
+    disp('Direct problem: computation started ...');
+    q.direct();
+    disp('Direct problem: computation finished!');
     theB = q.b;
     theCrit = q.criteria();
     theConstr = q.constraint();
@@ -896,7 +906,6 @@ try
     set(handles.directProblemText, 'String', myString);
     
     toc;
-    plotResults(q, 'DIRECT PROBLEM')
 catch err
    f = msgbox(getReport(err)); 
 end
