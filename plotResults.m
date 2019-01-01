@@ -12,6 +12,7 @@ function plotResults(problem, myTitle)
     subplot(3, 1, 1);
     hold on
     plot(x,problem.u(x));
+    legend('u(x)')
     hold off
     xlabel(' ')
     title('u(x)');
@@ -19,7 +20,7 @@ function plotResults(problem, myTitle)
     subplot(3, 1, [2 3]); 
     hold on
     plot(x, y);
-
+    
     optRange = problem.Omega(problem.optO)';
     line(optRange, repmat(problem.yd, size(optRange)),...
         'Color', 'r', 'LineStyle', '-.');
@@ -30,6 +31,8 @@ function plotResults(problem, myTitle)
 
     line(repmat(problem.Omega(1),2,1), repmat(get(gca,'YLim'),2,1)',...
         'Color', 'm', 'LineStyle', ':');
+    
+    legend('y(x)', 'yd', 'yMax')
     hold off
     title('y(x)');
     xlabel('x');

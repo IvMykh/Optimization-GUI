@@ -429,10 +429,10 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: delete(hObject) closes the figure
-question = questdlg('Are you sure?','Question')
-if strcmp(question,'Yes')
+%question = questdlg('Are you sure?','Question')
+%if strcmp(question,'Yes')
     delete(hObject);
-end
+%end
 
 
 
