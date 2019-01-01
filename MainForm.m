@@ -22,7 +22,7 @@ function varargout = MainForm(varargin)
 
 % Edit the above text to modify the response to help MainForm
 
-% Last Modified by GUIDE v2.5 27-Dec-2018 11:30:10
+% Last Modified by GUIDE v2.5 01-Jan-2019 12:33:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,12 +80,7 @@ function computeBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     clc;
-
     tic;
-    b0 = [
-        1 
-        1
-     ];
 
     approxMethod = 'constant';
     approxStr = get(get(handles.approxButtonGroup,'SelectedObject'),'String');
@@ -800,3 +795,10 @@ function edit28_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in solveDirectBtn.
+function solveDirectBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to solveDirectBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
